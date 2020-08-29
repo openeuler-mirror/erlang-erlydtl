@@ -1,0 +1,31 @@
+From: Dmitry Klionsky <dm.klionsky@gmail.com>
+Date: Tue, 27 Jun 2017 17:41:18 +0300
+Subject: [PATCH] Support Erlang/OTP 20.0
+
+
+diff --git a/.travis.yml b/.travis.yml
+index d1e5019..d50acb2 100644
+--- a/.travis.yml
++++ b/.travis.yml
+@@ -2,6 +2,8 @@ language: erlang
+ sudo: false
+ otp_release:
+ # Test on all supported releases accepted by the `require_otp_vsn` in rebar.config
++   - 20.0
++   - 19.3
+    - 18.0
+    - 17.4
+    - 17.3
+diff --git a/rebar.config b/rebar.config
+index 3ac7c11..4680515 100644
+--- a/rebar.config
++++ b/rebar.config
+@@ -2,7 +2,7 @@
+ 
+ %% accept R15B02.., any R16B except R16B03
+ %% also accept OTP v17, altough it may not work properly on that release yet..
+-{require_otp_vsn, "R15B0[^1]|R16B$|R16B[^0]|R16B0[^3]|R16B03-1|17|18|19"}.
++{require_otp_vsn, "R15B0[^1]|R16B$|R16B[^0]|R16B0[^3]|R16B03-1|17|18|19|20"}.
+ 
+ {erl_opts, [debug_info]}.
+ {yrl_opts, [{includefile, "include/erlydtl_preparser.hrl"}]}.

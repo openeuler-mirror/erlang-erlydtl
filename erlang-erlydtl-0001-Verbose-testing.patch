@@ -1,0 +1,31 @@
+From: Peter Lemenkov <lemenkov@gmail.com>
+Date: Thu, 19 May 2016 18:55:10 +0300
+Subject: [PATCH] Verbose testing
+
+Signed-off-by: Peter Lemenkov <lemenkov@gmail.com>
+
+diff --git a/rebar-tests.config b/rebar-tests.config
+index 199ac85..d2440ff 100644
+--- a/rebar-tests.config
++++ b/rebar-tests.config
+@@ -1,20 +1,5 @@
+ %% -*- mode: erlang -*-
+ 
+-{eunit_opts,
+- [%% This turns off the default output, MUST HAVE
+-  no_tty,
+-  %% Uses the progress formatter with ANSI-colored output
+-  {report, {eunit_progress, [colored
+-                             %% uncomment to get a list of slowest running tests
+-                             %%, profile
+-                            ]}}
+- ]}.
+-
+-{deps,
+- [{eunit_formatters, ".*",
+-   {git, "git://github.com/seancribbs/eunit_formatters", "35e3e6ab2db48af776a1a21bba6f1461c97caacb"}}
+- ]}.
+-
+ {pre_hooks,
+  [{eunit,
+    "erlc -I include/erlydtl_preparser.hrl -o test"
