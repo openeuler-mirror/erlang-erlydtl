@@ -1,0 +1,58 @@
+From: brigadier <eugeneim@gmail.com>
+Date: Fri, 17 Aug 2018 00:38:56 +0300
+Subject: [PATCH] compatibility with OTP 21
+
+
+diff --git a/rebar.config b/rebar.config
+index 4680515..8712dfa 100644
+--- a/rebar.config
++++ b/rebar.config
+@@ -2,7 +2,7 @@
+ 
+ %% accept R15B02.., any R16B except R16B03
+ %% also accept OTP v17, altough it may not work properly on that release yet..
+-{require_otp_vsn, "R15B0[^1]|R16B$|R16B[^0]|R16B0[^3]|R16B03-1|17|18|19|20"}.
++{require_otp_vsn, "R15B0[^1]|R16B$|R16B[^0]|R16B0[^3]|R16B03-1|17|18|19|20|21"}.
+ 
+ {erl_opts, [debug_info]}.
+ {yrl_opts, [{includefile, "include/erlydtl_preparser.hrl"}]}.
+diff --git a/src/erlydtl_filters.erl b/src/erlydtl_filters.erl
+index 3fe1be3..43eeae8 100644
+--- a/src/erlydtl_filters.erl
++++ b/src/erlydtl_filters.erl
+@@ -355,10 +355,10 @@ floatformat(_, _) -> "".
+ floatformat_io(Number, []) ->
+     floatformat_io(Number, -1);
+ floatformat_io(Number, 0) ->
+-    hd(io_lib:format("~B", [erlang:round(Number)]));
++    lists:flatten(io_lib:format("~B", [erlang:round(Number)]));
+ floatformat_io(Number, Precision) when Precision > 0 ->
+-    hd(io_lib:format("~.*f",[Precision, Number]));
+-floatformat_io(Number, Precision) when Precision < 0 ->   
++    lists:flatten(io_lib:format("~.*f",[Precision, Number]));
++floatformat_io(Number, Precision) when Precision < 0 ->
+     Round = erlang:round(Number),
+     RoundPrecision = round(Number, -Precision),
+     if RoundPrecision == Round ->
+@@ -590,11 +590,12 @@ stringformat(Input, Conversion) when is_binary(Conversion) ->
+     stringformat(Input, unicode:characters_to_list(Conversion));
+ stringformat(Input, Conversion) ->
+     ParsedConversion = re:replace(Conversion, "([\-#\+ ]?)([0-9\*]+)?(\.?)([0-9]?)([diouxXeEfFgGcrs])", "\\1 ,\\2 ,\\3 ,\\4 ,\\5 ", [{return,list}]),
++
+     ?debugFmt("ParsedConversion: ~p~n", [ParsedConversion]),
+     ParsedConversion1 = lists:map(fun(X) -> string:strip(X) end, string:tokens(ParsedConversion, ",")),
+     [ConversionFlag, MinFieldWidth, Precision, PrecisionLength, ConversionType] = ParsedConversion1,
+     ?debugFmt("ConversionFlag, MinFieldWidth, Precision, PrecisionLength, ConversionType: ~p, ~p, ~p, ~p, ~p ~n", [ConversionFlag, cast_to_integer(MinFieldWidth), Precision, cast_to_integer(PrecisionLength), ConversionType]),
+-    [String] = stringformat_io(Input, Conversion, ConversionFlag, cast_to_integer(MinFieldWidth), Precision, cast_to_integer(PrecisionLength), ConversionType),
++    String = stringformat_io(Input, Conversion, ConversionFlag, cast_to_integer(MinFieldWidth), Precision, cast_to_integer(PrecisionLength), ConversionType),
+     lists:flatten(String).
+ 
+ %% @doc
+@@ -640,6 +641,7 @@ stringformat_io(Input, Conversion, _ConversionFlag, _MinFieldWidth,
+     io_lib:format(Format, [cast_to_float(Input)]);
+ stringformat_io(Input, Conversion, _ConversionFlag, _MinFieldWidth,
+     [], [], "d")->
++
+     %?debugMsg("plain d"),
+     %Conversion = [ConversionFlag, MinFieldWidth, Precision, PrecisionLength, ConversionType],
+     Format = "~" ++ re:replace(Conversion, "d", "B", [{return, list}] ),

@@ -1,0 +1,18 @@
+From: Seb Maynard <seb@seb.so>
+Date: Thu, 24 Jan 2019 14:47:14 +0000
+Subject: [PATCH] Make sure that when checking if a function is exported that
+ the module in question is loaded by the code server
+
+
+diff --git a/src/erlydtl_runtime.erl b/src/erlydtl_runtime.erl
+index fad5872..e7efcc8 100644
+--- a/src/erlydtl_runtime.erl
++++ b/src/erlydtl_runtime.erl
+@@ -472,6 +472,7 @@ read_file(Module, Function, DocRoot, FileName, ReaderOptions) ->
+             throw({read_file, AbsName, Reason})
+     end.
+ read_file_internal(Module, Function, FileName, ReaderOptions) ->
++    _ = code:ensure_loaded(Module),
+     case erlang:function_exported(Module, Function,1) of
+         true ->
+             Module:Function(FileName);
